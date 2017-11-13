@@ -1,6 +1,4 @@
 <?php
-require_once(realpath(dirname(__FILE__)) . '/Agent.php');
-
 /**
  * @access public
  * @author andreas.martin
@@ -19,14 +17,18 @@ class AuthToken {
 	 */
 	private $validator;
 	/**
-	 * @AttributeType Timestamp
+	 * @AttributeType String
 	 */
 	private $expiration;
 	/**
-	 * @AssociationType Agent
+	 * @AssociationType int
 	 * @AssociationMultiplicity 1
 	 */
-	private $agent;
+	private $agentid;
+	/**
+	 * @AttributeType int
+	 */
+	private $type;
 
 	/**
 	 * @access public
@@ -90,8 +92,8 @@ class AuthToken {
 
 	/**
 	 * @access public
-	 * @return Timestamp
-	 * @ReturnType Timestamp
+	 * @return String
+	 * @ReturnType String
 	 */
 	public function getExpiration() {
 		return $this->expiration;
@@ -99,33 +101,53 @@ class AuthToken {
 
 	/**
 	 * @access public
-	 * @param Timestamp expiration
+	 * @param String expiration
 	 * @return void
-	 * @ParamType expiration Timestamp
+	 * @ParamType expiration String
 	 * @ReturnType void
 	 */
-	public function setExpiration(Timestamp $expiration) {
+	public function setExpiration($expiration) {
 		$this->expiration = $expiration;
 	}
 
 	/**
 	 * @access public
-	 * @return Agent
-	 * @ReturnType Agent
+	 * @return int
+	 * @ReturnType int
 	 */
-	public function getAgent() {
-		return $this->agent;
+	public function getAgentid() {
+		return $this->agentid;
 	}
 
 	/**
 	 * @access public
-	 * @param Agent agent
+	 * @param int agentid
 	 * @return void
-	 * @ParamType agent Agent
+	 * @ParamType agentid int
 	 * @ReturnType void
 	 */
-	public function setAgent(Agent $agent) {
-		$this->agent = $agent;
+	public function setAgentid($agentid) {
+		$this->agentid = $agentid;
+	}
+
+	/**
+	 * @access public
+	 * @return int
+	 * @ReturnType int
+	 */
+	public function getType() {
+		return $this->type;
+	}
+
+	/**
+	 * @access public
+	 * @param int type
+	 * @return void
+	 * @ParamType type int
+	 * @ReturnType void
+	 */
+	public function setType($type) {
+		$this->type = $type;
 	}
 }
 ?>

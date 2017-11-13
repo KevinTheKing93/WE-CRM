@@ -1,11 +1,12 @@
 <?php
 require_once(realpath(dirname(__FILE__)) . '/Agent.php');
+require_once(realpath(dirname(__FILE__)) . '/BasicDAO.php');
 
 /**
  * @access public
  * @author andreas.martin
  */
-class AgentDAO {
+class AgentDAO extends BasicDAO {
 
 	/**
 	 * @access public
@@ -37,26 +38,6 @@ class AgentDAO {
 	 * @ReturnType Agent
 	 */
 	public function update(Agent $agent) {
-		// Not yet implemented
-	}
-
-	/**
-	 * @access public
-	 * @param Agent agent
-	 * @return Agent
-	 * @ParamType agent Agent
-	 * @ReturnType Agent
-	 */
-	public function delete(Agent $agent) {
-		// Not yet implemented
-	}
-
-	/**
-	 * @access public
-	 * @return Agent[]
-	 * @ReturnType Agent[]
-	 */
-	public function findAll() {
 		// Not yet implemented
 	}
 

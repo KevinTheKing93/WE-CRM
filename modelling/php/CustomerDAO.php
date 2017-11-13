@@ -1,11 +1,12 @@
 <?php
 require_once(realpath(dirname(__FILE__)) . '/Customer.php');
+require_once(realpath(dirname(__FILE__)) . '/BasicDAO.php');
 
 /**
  * @access public
  * @author andreas.martin
  */
-class CustomerDAO {
+class CustomerDAO extends BasicDAO {
 
 	/**
 	 * @access public
@@ -46,15 +47,6 @@ class CustomerDAO {
 	 * @ParamType customer Customer
 	 */
 	public function delete(Customer $customer) {
-		// Not yet implemented
-	}
-
-	/**
-	 * @access public
-	 * @return Customer[]
-	 * @ReturnType Customer[]
-	 */
-	public function findAll() {
 		// Not yet implemented
 	}
 

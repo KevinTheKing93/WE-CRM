@@ -6,7 +6,8 @@
  * Time: 15:51
  */
 $routes = [];
-$GLOBALS["ROOT_URL"] = str_replace("/index.php","",$_SERVER['PHP_SELF']);
+$protocol = isset($_SERVER['HTTPS'])||(isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === "https") ? 'https' : 'http';
+$GLOBALS["ROOT_URL"] = $protocol . "://" . $_SERVER['SERVER_NAME'] . strstr($_SERVER['PHP_SELF'], $_SERVER['ORIGINAL_PATH'], true);
 if(!empty($_SERVER['REDIRECT_ORIGINAL_PATH'])) {
     $_SERVER['PATH_INFO'] = $_SERVER['REDIRECT_ORIGINAL_PATH'];
 }
@@ -14,33 +15,30 @@ else {
     $_SERVER['PATH_INFO'] = "/";
 }
 
-function route($method, $path, $function) {
-    route_auth($method, $path, null, $function);
+function route($method, $path, $routeFunction) {
+    route_auth($method, $path, null, $routeFunction);
 }
 
-function route_auth($method, $path, $auth, $function) {
+function route_auth($method, $path, $authFunction, $routeFunction) {
     global $routes;
     $path = trim($path, '/');
-    $routes[$method][$path] = array("auth" => $auth, "function" => $function);
+    $routes[$method][$path] = array("authFunction" => $authFunction, "routeFunction" => $routeFunction);
 }
 
 function call_route($method, $path) {
     global $routes;
-    global $error;
+    global $errorFunction;
     $path = trim(parse_url($path, PHP_URL_PATH), '/');
-    if(!array_key_exists($method, $routes)) {
-        call_user_func($error); return;
-    }
-    if(!array_key_exists($path, $routes[$method])) {
-        call_user_func($error); return;
+    if(!array_key_exists($method, $routes) || !array_key_exists($path, $routes[$method])) {
+        $errorFunction(); return;
     }
     $route = $routes[$method][$path];
-    if(isset($route["auth"])) {
-        if (!call_user_func($route["auth"])) {
+    if(isset($route["authFunction"])) {
+        if (!$route["authFunction"]()) {
             return;
         }
     }
-    call_user_func($route["function"]);
+    $route["routeFunction"]();
 }
 
 function redirect($redirect_path) {

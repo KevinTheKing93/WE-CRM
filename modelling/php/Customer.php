@@ -1,6 +1,4 @@
 <?php
-require_once(realpath(dirname(__FILE__)) . '/Agent.php');
-
 /**
  * @access private
  * @author andreas.martin
@@ -9,24 +7,24 @@ class Customer {
 	/**
 	 * @AttributeType int
 	 */
-	private $id;
+	protected $id;
 	/**
 	 * @AttributeType String
 	 */
-	private $name;
+	protected $name;
 	/**
 	 * @AttributeType String
 	 */
-	private $email;
+	protected $email;
 	/**
 	 * @AttributeType String
 	 */
-	private $mobile;
+	protected $mobile;
 	/**
-	 * @AssociationType Agent
+	 * @AssociationType int
 	 * @AssociationMultiplicity 1
 	 */
-	public $agentCustomer;
+	private $agentid;
 
 	/**
 	 * @access public
@@ -106,6 +104,26 @@ class Customer {
 	 */
 	public function setMobile($mobile) {
 		$this->mobile = $mobile;
+	}
+
+	/**
+	 * @access public
+	 * @return int
+	 * @ReturnType int
+	 */
+	public function getAgentid() {
+		return $this->agentid;
+	}
+
+	/**
+	 * @access public
+	 * @param int agentid
+	 * @return void
+	 * @ParamType agentid int
+	 * @ReturnType void
+	 */
+	public function setAgentid($agentid) {
+		$this->agentid = $agentid;
 	}
 }
 ?>
