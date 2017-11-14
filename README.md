@@ -13,6 +13,8 @@ This is a reference project elaborated by the students step-by-step in every FHN
     - [Domain Model](#domain-model)
     - [Data Access Model](#data-access-model)
     - [Business Logic Model](#business-logic-model)
+    - [Layering Structure](#layering-structure)
+    - [Layering Models](#layering-models)
 - [Implementation](#implementation)
     - [Stage 1: Building a Static Website with Bootstrap](#stage-1-building-a-static-website-with-bootstrap)
     - [Stage 2: PHP Files, Basic Router and Session](#stage-2-php-files-basic-router-and-session)
@@ -101,6 +103,14 @@ TODO: write
 ### Business Logic Model
 
 ![](modelling/images/WE-CRM-Business-Logic.png)
+
+### Layering Structure
+
+![](modelling/images/WE-CRM-Layering-Structure.png)
+
+### Layering Models
+
+![](modelling/images/WE-CRM-Layering-Models.png)
 
 ## Implementation
 
@@ -582,15 +592,15 @@ Since this reference project does not rely on a template engine such as Blade or
 
 The one template view pattern does not really exist. This implementation has been inspired by the Book [PHP Design Patterns](https://books.google.ch/books?id=2R5IBAAAQBAJ&pg=PA453) and the example of [Alejandro Gervasio](https://www.sitepoint.com/flexible-view-manipulation-1/).
 
-In following the View class is explained - the complete View class can be found within the stage09\view folder.
+In following the TemplateView class is explained - the complete TemplateView class can be found within the stage09\view folder.
 
 The basic idea is to assign a view `.php` file to a view by passing the information through the constructor:
 ```PHP
-$contentView = new View("customerEdit.php");
+$contentView = new TemplateView("customerEdit.php");
 ```
 ___
 ```PHP
-class View {
+class TemplateView {
 
     private $view;
 
@@ -602,13 +612,13 @@ class View {
 
 Once the view has been instantiated, data can be injected into the view by using a magic `__set()` method. Finally, the view will be rendered by using the `render()` method:
 ```PHP
-$contentView = new View("customerEdit.php");
+$contentView = new TemplateView("customerEdit.php");
 $contentView->customer = (new CustomerServiceImpl())->readCustomer($id);
 echo $contentView->render();
 ```
 ___
 ```PHP
-class View {
+class TemplateView {
 
     private $view;
     private $variables = array();
@@ -632,7 +642,7 @@ The data that has been injected can be accessed within a view `.php` file by usi
 ```
 ___
 ```PHP
-class View {
+class TemplateView {
 
     private $variables = array();
 
@@ -650,14 +660,14 @@ class View {
 
 #### XSS
 
-To prevent XSS (Cross-Site Scripting) attacks any character in a user input that can affect the structure of the HTML document must be escaped on output (when displaying to a user). Following the guidelines of the [Paragon Initiative Enterprises Blog](https://paragonie.com/blog/2015/06/preventing-xss-vulnerabilities-in-php-everything-you-need-know) the View class consists of a static method that can be used in a view `.php` file:
+To prevent XSS (Cross-Site Scripting) attacks any character in a user input that can affect the structure of the HTML document must be escaped on output (when displaying to a user). Following the guidelines of the [Paragon Initiative Enterprises Blog](https://paragonie.com/blog/2015/06/preventing-xss-vulnerabilities-in-php-everything-you-need-know) the TemplateView class consists of a static method that can be used in a view `.php` file:
 
 ```PHP
 <input class="form-control" type="text" name="name" value="<?php echo isset($this->customer) ? View::noHTML($this->customer->getName()) : ''; ?>">
 ```
 ___
 ```PHP
-class View {
+class TemplateView {
 
     public static function noHTML($input, $bEncodeAll = true, $encoding = "UTF-8")
     {
@@ -742,7 +752,86 @@ class LayoutRendering
 
 ### Stage 11: Validation
 
-In stage 11, a PHP input field validator is implemented. Validation refers to the possibility to verify certain fields such as an email field containing a valid email address (name@domain.nic). Validation can be realised on the client and back-end side. This PHP validation is realised on the PHP back-end, by implementing domain-specific validation classes.
+In stage 11, a PHP input field validator is implemented. Validation refers to the possibility to verify certain fields such as an email field containing a valid email address (name@domain.nic). Validation can be realised on the client and back-end side. This PHP validation is realised on the PHP back-end, by implementing domain-specific validation classes:
+
+```PHP
+class CustomerValidator
+{
+    private $valid = true;
+    private $emailError = null;
+
+    public function __construct(Customer $customer)
+    {
+        $this->validate($customer);
+    }
+
+    public function validate(Customer $customer)
+    {
+        if (!is_null($customer)) {
+            if (!filter_var($customer->getEmail(), FILTER_VALIDATE_EMAIL)) {
+                $this->emailError = 'Please enter a valid email address';
+                $this->valid = false;
+            }
+        } else {
+            $this->valid = false;
+        }
+        return $this->valid;
+
+    }
+
+    public function isValid()
+    {
+        return $this->valid;
+    }
+
+    public function isEmailError()
+    {
+        return isset($this->emailError);
+    }
+
+    public function getEmailError()
+    {
+        return $this->emailError;
+    }
+}
+```
+
+Such a validator can then be used in a controller to verify if the provided date is valid:
+
+```PHP
+class CustomerController
+{
+    public static function update(){
+        $customer = new Customer();
+        // ...
+        $customerValidator = new CustomerValidator($customer);
+        if($customerValidator->isValid()) {
+            // ...
+        }
+        else{
+            $contentView = new View("customerEdit.php");
+            $contentView->customer = $customer;
+            $contentView->customerValidator = $customerValidator;
+            LayoutRendering::basicLayout($contentView);
+            return false;
+        }
+        return true;
+    }
+
+}
+```
+
+If data is invalid, error messages can be displayed:
+
+```HTML
+<div class="form-group <?php echo isset($this->customerValidator) && $this->customerValidator->isEmailError() ? "has-error" : ""; ?>">
+    <div class="input-group">
+        <div class="input-group-addon"><span>Email </span></div>
+        <input class="form-control" type="email" name="email" value="<?php echo isset($this->customer) ? View::noHTML($this->customer->getEmail()) : ''; ?>">
+    </div>
+    <p class="help-block"><?php echo isset($this->customerValidator) && $this->customerValidator->isEmailError() ? $this->customerValidator->getEmailError() : ""; ?></p>
+</div>
+```
 
 ### Stage 12: Auth and Remember Me
 
